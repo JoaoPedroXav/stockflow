@@ -1,6 +1,7 @@
 import 'server-only';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { Product, ProductInput } from '@/lib/types';
+import type { Product, ProductInput, ProductUpdateInput, StockMovement, StockMovementInput } from '@/lib/types';
+import { InputError } from '@/lib/validation';
 
 let client: SupabaseClient | null = null;
 
@@ -31,7 +32,7 @@ export async function createProduct(input: ProductInput): Promise<Product> {
   return data as Product;
 }
 
-export async function updateProduct(id: string, input: ProductInput): Promise<Product | null> {
+export async function updateProduct(id: string, input: ProductUpdateInput): Promise<Product | null> {
   const { data, error } = await db().from('products').update(input).eq('id', id).select('*').maybeSingle();
   if (error) throw new Error(`Falha ao atualizar produto no Supabase: ${error.message}`);
   return data as Product | null;
@@ -41,4 +42,28 @@ export async function deleteProduct(id: string): Promise<boolean> {
   const { data, error } = await db().from('products').delete().eq('id', id).select('id').maybeSingle();
   if (error) throw new Error(`Falha ao excluir produto no Supabase: ${error.message}`);
   return Boolean(data);
+}
+
+export async function listStockMovements(): Promise<StockMovement[]> {
+  const { data, error } = await db().from('stock_movements').select('*').order('created_at', { ascending: false }).limit(200);
+  if (error) throw new Error(`Falha ao consultar movimentações no Supabase: ${error.message}`);
+  return (data ?? []) as StockMovement[];
+}
+
+export async function registerStockMovement(input: StockMovementInput): Promise<StockMovement> {
+  const { data, error } = await db().rpc('register_stock_movement', {
+    p_product_id: input.product_id,
+    p_movement_type: input.movement_type,
+    p_quantity: input.quantity,
+    p_reason: input.reason,
+  });
+  if (error) {
+    if (error.code === '22023' || error.code === '22003' || error.code === 'P0002') {
+      throw new InputError(error.message);
+    }
+    throw new Error(`Falha ao registrar movimentação no Supabase: ${error.message}`);
+  }
+  const movement = Array.isArray(data) ? data[0] : data;
+  if (!movement) throw new Error('O banco não retornou a movimentação registrada.');
+  return movement as StockMovement;
 }

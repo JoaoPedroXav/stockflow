@@ -2,7 +2,7 @@ import 'server-only';
 import { Redis } from '@upstash/redis';
 import type { CacheObservation, DashboardMetrics } from '@/lib/types';
 
-export const DASHBOARD_KEY = 'stockflow:dashboard:v1';
+export const DASHBOARD_KEY = 'stockflow:dashboard:v2';
 export const HIT_KEY = 'stockflow:cache:hits';
 export const MISS_KEY = 'stockflow:cache:misses';
 export const LAST_QUERY_KEY = 'stockflow:cache:last-query';

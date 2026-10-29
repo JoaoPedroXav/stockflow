@@ -9,13 +9,33 @@ export type Product = {
 };
 
 export type ProductInput = Pick<Product, 'name' | 'category' | 'quantity' | 'unit_price'>;
+export type ProductUpdateInput = Pick<Product, 'name' | 'category' | 'unit_price'>;
+
+export type StockMovement = {
+  id: string;
+  product_id: string | null;
+  product_name: string;
+  movement_type: 'in' | 'out';
+  quantity: number;
+  quantity_before: number;
+  quantity_after: number;
+  reason: string;
+  created_at: string;
+};
+
+export type StockMovementInput = {
+  product_id: string;
+  movement_type: StockMovement['movement_type'];
+  quantity: number;
+  reason: string;
+};
 
 export type DashboardMetrics = {
   totalProducts: number;
   totalUnits: number;
   stockValue: number;
-  lowStockCount: number;
-  lowStockProducts: Product[];
+  totalCategories: number;
+  recentProducts: Product[];
 };
 
 export type CacheStatus = 'HIT' | 'MISS' | 'UNAVAILABLE';

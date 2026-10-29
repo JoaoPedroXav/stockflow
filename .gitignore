@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+# Materiais de gravação fora do repositório
+docs/roteiro-video.md
+output/
+tmp/
